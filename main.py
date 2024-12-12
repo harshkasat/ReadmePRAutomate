@@ -1,9 +1,9 @@
-#main.py
-import os
 import tempfile
 from dotenv import load_dotenv
-from langchain import PromptTemplate, LLMChain
-from config import WHITE, GREEN, RESET_COLOR, model_name, configure_llm
+# from langchain import PromptTemplate, LLMChain
+from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
+from config import GREEN, RESET_COLOR, model_name, configure_llm
 from utils import format_user_question
 from file_processing import clone_github_repo, load_and_index_files
 from questions import ask_question, QuestionContext
@@ -49,7 +49,7 @@ def main():
             conversation_history = ""
             question_context = QuestionContext(index, documents, llm_chain, model_name, repo_name, github_url, conversation_history, file_type_counts, filenames)
             try:
-                user_question = input("\n" + WHITE + "Ask a question about the repository (type 'exit()' to quit): " + RESET_COLOR)
+                user_question = 'give me full detail README file it must cover all things.'
                 print('Thinking...')
                 user_question = format_user_question(user_question)
 
@@ -60,3 +60,6 @@ def main():
                 print(f"An error occurred: {e}")
         else:
             print("Failed to clone the repository.")
+
+if __name__ == '__main__':
+    main()
