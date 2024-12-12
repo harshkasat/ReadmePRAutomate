@@ -3,14 +3,12 @@ import os
 import tempfile
 from dotenv import load_dotenv
 from langchain import PromptTemplate, LLMChain
-from langchain.llms import OpenAI
-from config import WHITE, GREEN, RESET_COLOR, model_name
+from config import WHITE, GREEN, RESET_COLOR, model_name, configure_llm
 from utils import format_user_question
 from file_processing import clone_github_repo, load_and_index_files
 from questions import ask_question, QuestionContext
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def main():
     github_url = input("Enter the GitHub URL of the repository: ")
@@ -24,7 +22,7 @@ def main():
                 exit()
 
             print("Repository cloned. Indexing files...")
-            llm = OpenAI(api_key=OPENAI_API_KEY, temperature=0.2)
+            llm = configure_llm()
 
             template = """
             Repo: {repo_name} ({github_url}) | Conv: {conversation_history} | Docs: {numbered_documents} | Q: {question} | FileCount: {file_type_counts} | FileNames: {filenames}
@@ -50,20 +48,15 @@ def main():
 
             conversation_history = ""
             question_context = QuestionContext(index, documents, llm_chain, model_name, repo_name, github_url, conversation_history, file_type_counts, filenames)
-            while True:
-                try:
-                    user_question = input("\n" + WHITE + "Ask a question about the repository (type 'exit()' to quit): " + RESET_COLOR)
-                    if user_question.lower() == "exit()":
-                        break
-                    print('Thinking...')
-                    user_question = format_user_question(user_question)
+            try:
+                user_question = input("\n" + WHITE + "Ask a question about the repository (type 'exit()' to quit): " + RESET_COLOR)
+                print('Thinking...')
+                user_question = format_user_question(user_question)
 
-                    answer = ask_question(user_question, question_context)
-                    print(GREEN + '\nANSWER\n' + answer + RESET_COLOR + '\n')
-                    conversation_history += f"Question: {user_question}\nAnswer: {answer}\n"
-                except Exception as e:
-                    print(f"An error occurred: {e}")
-                    break
-
+                answer = ask_question(user_question, question_context)
+                print(GREEN + '\nANSWER\n' + answer + RESET_COLOR + '\n')
+                conversation_history += f"Question: {user_question}\nAnswer: {answer}\n"
+            except Exception as e:
+                print(f"An error occurred: {e}")
         else:
             print("Failed to clone the repository.")
