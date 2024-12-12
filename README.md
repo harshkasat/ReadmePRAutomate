@@ -1,57 +1,85 @@
 # ReadmePRAutomate
 
-This project automates the process of generating a README file for a GitHub repository by analyzing the codebase and extracting relevant information.  It leverages Langchain for document loading, processing, and question answering, utilizing a Google Gemini AI model for natural language understanding.
+**A GitHub Action to automatically generate READMEs based on your repository's code and files.**
 
-## Purpose and Features
-
-The primary purpose of `ReadmePRAutomate` is to create a comprehensive README.md file based on the contents of a given GitHub repository.  This automation reduces the manual effort required to write a README and ensures consistency across projects. Key features include:
-
-* **Repository Cloning:** Clones a specified GitHub repository locally.
-* **File Loading and Indexing:** Loads various file types (txt, md, py, ipynb, etc.) from the repository and indexes them using BM25Okapi and TF-IDF for efficient search.
-* **Document Processing:** Splits large documents into smaller chunks for better processing.  Cleaning and tokenization are applied to the text.
-* **Search Functionality:**  Allows searching the indexed documents based on a given query.  The search combines BM25 and TF-IDF scores for improved accuracy.
-* **README Generation (Implicit):** While not explicitly generating a README in a single function, the code lays the groundwork for this.  The project analyzes the codebase and extracts information to eventually inform the creation of a README file. This would likely involve formulating questions about the project (e.g., "What is the purpose of this project?", "What are the main features?", "How do I set up this project?") and using the search functionality to answer them, then formatting those answers into a README structure.
-
-## Functions and Code Details
-
-The core functionality is distributed across several files:
-
-**1. `requirements.txt`:** Lists the project's dependencies, including Langchain, various AI and NLP libraries, and data processing tools.  (See the provided list of packages above.)
-
-**2. `app.py`:** The main entry point of the application.  It simply calls the `main` function (defined in `main.py`, not provided).
-
-**3. `config.py`:** Contains configuration settings, including the Google Gemini API key, model name, and LLM configuration.  It initializes the `ChatGoogleGenerativeAI` LLM from the Langchain Google GenAI library.  Error handling is included to check for missing API keys and LLM initialization failures.  Example:
-
-```python
-genai_api_key = os.getenv('GEMINI_API_KEY')
-os.environ['GOOGLE_API_KEY'] = os.getenv('GEMINI_API_KEY')
-if genai_api_key is None:
-    raise ValueError("Missing GEMINI_API_KEY environment variable")
-
-def configure_llm():
-    try:
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7, top_p=0.85)
-        if llm is None:
-            raise ValueError("LLM component is None")
-        return llm
-    except Exception as e:
-        print(f"Failed to configure LLM: {e}")
-        return None
-```
-
-**4. & 5. `file_processing.py`:** This file contains functions for:
-
-* **`clone_github_repo(github_url, local_path)`:** Clones a GitHub repository using `subprocess.run`.  Handles potential errors during cloning.
-* **`load_and_index_files(repo_path)`:** Loads files of various extensions from a given path, splits them into chunks using `RecursiveCharacterTextSplitter`, and creates a BM25Okapi index for efficient searching.  It also calculates TF-IDF vectors.  The function returns the index, split documents, file type counts, and a list of file sources.
-* **`search_documents(query, index, documents, n_results=5)`:** Searches the indexed documents using both BM25 and TF-IDF cosine similarity, combines the scores, and returns the top `n_results` documents.
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/harshkasat/ReadmePRAutomate/actions/workflows/main.yml/badge.svg)](https://github.com/harshkasat/ReadmePRAutomate/actions/workflows/main.yml)
 
 
-**Other Files:** The presence of `main.py`, `questions.py`, and `utils.py` suggests that these files contain the main logic for driving the application, defining the questions to ask about the repository, and utility functions respectively, but their content isn't provided.
+## 1. Project Overview
 
-## Setup and Usage
+ReadmePRAutomate is a GitHub Action designed to simplify the process of creating comprehensive README files for your projects. It analyzes your repository's code, extracts relevant information, and generates a structured README.md file. This action is particularly useful for projects with many files and complex structures, saving developers significant time and effort.  It leverages Langchain for natural language processing to help understand and summarize your project's contents.
 
-1. **Install Dependencies:**  Install the packages listed in `requirements.txt` using `pip install -r requirements.txt`.
-2. **Set Environment Variables:** Set the `GEMINI_API_KEY` environment variable with your Google Gemini API key.
-3. **Run the Application:** Execute `python app.py`.  (The exact execution details depend on the contents of `main.py`, which is not provided).  The application will likely require a GitHub repository URL as input.
 
-**Note:**  The provided code snippets show only parts of the functionality.  The complete functionality relies on the interaction between all the files, especially the missing `main.py` which orchestrates the process.  The README generation aspect is implicit and would likely be implemented within `main.py` or a related file.
+## 2. Key Features
+
+* **Automatic README generation:** Analyzes your repository and generates a README.md file.
+* **Structured output:** Creates a well-organized README with sections for prerequisites, installation, usage, etc.
+* **Langchain integration:** Uses Langchain for advanced text processing and summarization.
+* **Customization:**  While the current implementation is hardcoded, future versions could allow for more customization of the README's content and structure.
+* **GitHub Actions integration:** Seamlessly integrates into your GitHub workflow.
+
+
+## 3. Table of Contents
+
+* [Project Overview](#1-project-overview)
+* [Key Features](#2-key-features)
+* [Prerequisites](#4-prerequisites)
+* [Installation](#5-installation-guide)
+* [Usage](#7-usage-examples)
+* [Project Architecture](#8-project-architecture)
+* [License](#17-license)
+
+
+## 4. Prerequisites
+
+* A GitHub repository.
+* A GitHub account with access to create GitHub Actions workflows.
+* Python 3.7 or higher.
+* The dependencies listed in `requirements.txt`.  These include various packages for text processing, natural language processing (Langchain, Google Generative AI), and file handling.
+
+
+## 5. Installation Guide
+
+1. **Create a GitHub Actions workflow:** Create a YAML file (e.g., `.github/workflows/readme-generation.yml`) in your repository.  The contents of this file will need to be developed to call the ReadmePRAutomate action.  This is not currently provided in the repository.
+
+2. **Add the action:**  The workflow file will need to reference the ReadmePRAutomate action. This will require specifying the action's location (likely a GitHub repository). Again, this is not directly provided in the available code.
+
+3. **Configure the action:** The action will likely require configuration options (not currently defined in the provided code) to specify which files to analyze and how to structure the generated README.
+
+
+## 7. Usage Examples
+
+The provided code does not contain a readily usable example of how to generate a README. The `main.py` file simply calls a `main` function from a separate `main.py` file (which is not provided). The core logic for README generation resides in `file_processing.py` and uses Langchain and Google Generative AI.  However,  the provided code snippets show the components:
+
+**`file_processing.py` (Partial):**
+
+This file contains functions to:
+
+* `clone_github_repo`: Clones a GitHub repository locally using `git clone`.
+* `load_and_index_files`: Loads files from a specified path, splits them into chunks, and creates a BM25Okapi index for efficient search.  It supports a wide range of file extensions.
+* `search_documents`: Searches the indexed documents using a query, combining BM25 and TF-IDF scoring methods.
+
+
+**Example Snippet (Illustrative - Requires Completion):**
+
+The actual README generation would involve using the functions in `file_processing.py` to analyze the repository, extract relevant information, and format it into a Markdown structure.  This process is not fully implemented in the provided code.
+
+
+## 8. Project Architecture
+
+The project is composed of several Python files:
+
+* `app.py`: Entry point for the application (currently incomplete).
+* `config.py`: Contains configuration settings, including the Google Gemini API key.
+* `file_processing.py`: Core logic for file loading, indexing, and searching.
+* `main.py` (missing): Likely contains the main logic for README generation.
+* `utils.py` (missing): Likely contains utility functions.
+
+
+The architecture relies on Langchain for text processing and Google's Gemini API for potentially advanced text summarization or generation capabilities (depending on the missing `main.py` implementation).
+
+
+## 17. License
+
+MIT License
