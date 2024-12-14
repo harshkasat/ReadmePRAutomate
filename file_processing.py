@@ -1,7 +1,6 @@
 # file_processing.py
 import os
 import uuid
-import subprocess
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from rank_bm25 import BM25Okapi
@@ -9,16 +8,9 @@ from langchain_community.document_loaders import DirectoryLoader, NotebookLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from utils import clean_and_tokenize
 
-def clone_github_repo(github_url, local_path):
-    try:
-        subprocess.run(['git', 'clone', github_url, local_path], check=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to clone repository: {e}")
-        return False
 
 def load_and_index_files(repo_path):
-    extensions = ['txt', 'md', 'markdown', 'rst', 'py', 'js', 'java', 'c', 'cpp', 'cs', 'go', 'rb', 'php', 'scala', 'html', 'htm', 'xml', 'json', 'yaml', 'yml', 'ini', 'toml', 'cfg', 'conf', 'sh', 'bash', 'css', 'scss', 'sql', 'gitignore', 'dockerignore', 'editorconfig', 'ipynb']
+    extensions = ['txt', 'md', 'markdown', 'rst', 'py', 'js', 'tsx', 'java', 'c', 'cpp', 'cs', 'go', 'rb', 'php', 'scala', 'html', 'htm', 'xml', 'json', 'yaml', 'yml', 'ini', 'toml', 'cfg', 'conf', 'sh', 'bash', 'css', 'scss', 'sql', 'gitignore', 'dockerignore', 'editorconfig', 'ipynb']
 
     file_type_counts = {}
     documents_dict = {}

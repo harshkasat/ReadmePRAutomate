@@ -1,67 +1,40 @@
 import tempfile
 from dotenv import load_dotenv
-from langchain.chains import LLMChain
-from langchain_core.prompts import PromptTemplate
-from config import GREEN, RESET_COLOR, model_name, configure_llm
-from utils import README_PROMPT, format_user_question
-from file_processing import clone_github_repo, load_and_index_files
-from questions import ask_question, QuestionContext
+from llm_readme_response import create_readme_file
+from pr_bot import clone_github_repo, chekout_github_repo, create_update_readme_file, \
+    commit_github_repo, push_github_repo, create_pull_request, fork_repo, delete_forked_repo
 
 load_dotenv()
 
-def main():
-    github_url = input("Enter the GitHub URL of the repository: ")
-    repo_name = github_url.split("/")[-1]
-    print("Cloning the repository...")
+def readme_automate(github_url):
+    
     try:
         with tempfile.TemporaryDirectory() as local_path:
-            if clone_github_repo(github_url, local_path):
-                index, documents, file_type_counts, filenames = load_and_index_files(local_path)
-                if index is None:
-                    print("No documents were found to index. Exiting.")
-                    exit()
+            try:
+                # Extract the owner and repository name from the URL
+                parts = github_url.rstrip("/").split("/")
+                owner = parts[-2]
+                repo_name = parts[-1]
+            except ValueError:
+                print("Invalid GitHub repository URL.")
+                return
+            try:
+                forked_url = fork_repo(owner=owner, repo_name=repo_name)
+            except Exception as e:
+                print(f"Failed to fork repository: {e}")
+                return
 
-                print("Repository cloned. Indexing files...")
-                llm = configure_llm()
-
-                template = """
-                Repo: {repo_name} ({github_url}) | Conv: {conversation_history} | Docs: {numbered_documents} | Q: {question} | FileCount: {file_type_counts} | FileNames: {filenames}
-
-                Instr:
-                1. Answer based on context/docs.
-                2. Focus on repo/code.
-                3. Consider:
-                    a. Purpose/features - describe.
-                    b. Functions/code - provide details/samples.
-                    c. Setup/usage - give instructions.
-                4. Unsure? Say "I am not sure".
-
-                Answer:
-                """
-
-                prompt = PromptTemplate(
-                    template=template,
-                    input_variables=["repo_name", "github_url", "conversation_history", "question", "numbered_documents", "file_type_counts", "filenames"]
-                )
-
-                llm_chain = LLMChain(prompt=prompt, llm=llm)
-
-                conversation_history = ""
-                question_context = QuestionContext(index, documents, llm_chain, model_name, repo_name, github_url, conversation_history, file_type_counts, filenames)
-                try:
-                    user_question = README_PROMPT
-                    print('Thinking...')
-                    user_question = format_user_question(user_question)
-
-                    answer = ask_question(user_question, question_context)
-                    print(GREEN + '\nANSWER\n' + answer + RESET_COLOR + '\n')
-                    conversation_history += f"Question: {user_question}\nAnswer: {answer}\n"
-                except Exception as e:
-                    print(f"An error occurred: {e}")
+            if clone_github_repo(forked_url, local_path):
+                readme_markdown = create_readme_file(github_url=github_url, local_path=local_path)
+                chekout_github_repo(local_path)
+                create_update_readme_file(local_path, readme_markdown)
+                commit_github_repo(local_path)
+                push_github_repo(local_path)
+                create_pull_request(owner=owner, repo=repo_name)
             else:
                 print("Failed to clone the repository.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-if __name__ == '__main__':
-    main()
+    finally:
+        if forked_url:
+            delete_forked_repo(repo_name=repo_name)
