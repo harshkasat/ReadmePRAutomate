@@ -1,57 +1,92 @@
 # ReadmePRAutomate
 
-This project automates the process of generating a README file for a GitHub repository by analyzing the codebase and extracting relevant information.  It leverages Langchain for document loading, processing, and question answering, utilizing a Google Gemini AI model for natural language understanding.
+**A GitHub Action to automatically generate a comprehensive README.md file for your project.**
 
-## Purpose and Features
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Workflow Status](https://github.com/harshkasat/ReadmePRAutomate/actions/workflows/main.yml/badge.svg)](https://github.com/harshkasat/ReadmePRAutomate/actions/workflows/main.yml)
 
-The primary purpose of `ReadmePRAutomate` is to create a comprehensive README.md file based on the contents of a given GitHub repository.  This automation reduces the manual effort required to write a README and ensures consistency across projects. Key features include:
 
-* **Repository Cloning:** Clones a specified GitHub repository locally.
-* **File Loading and Indexing:** Loads various file types (txt, md, py, ipynb, etc.) from the repository and indexes them using BM25Okapi and TF-IDF for efficient search.
-* **Document Processing:** Splits large documents into smaller chunks for better processing.  Cleaning and tokenization are applied to the text.
-* **Search Functionality:**  Allows searching the indexed documents based on a given query.  The search combines BM25 and TF-IDF scores for improved accuracy.
-* **README Generation (Implicit):** While not explicitly generating a README in a single function, the code lays the groundwork for this.  The project analyzes the codebase and extracts information to eventually inform the creation of a README file. This would likely involve formulating questions about the project (e.g., "What is the purpose of this project?", "What are the main features?", "How do I set up this project?") and using the search functionality to answer them, then formatting those answers into a README structure.
+## Project Overview
 
-## Functions and Code Details
+`ReadmePRAutomate` is a GitHub Action designed to simplify the process of creating a comprehensive README file for your repositories.  It leverages Langchain to analyze your project's code and files, extracting key information to automatically populate a structured README.  This reduces the manual effort required for documentation, ensuring your projects are well-documented from the start.  The generated README includes sections covering prerequisites, installation, usage examples, and more.
 
-The core functionality is distributed across several files:
 
-**1. `requirements.txt`:** Lists the project's dependencies, including Langchain, various AI and NLP libraries, and data processing tools.  (See the provided list of packages above.)
+## Table of Contents
 
-**2. `app.py`:** The main entry point of the application.  It simply calls the `main` function (defined in `main.py`, not provided).
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Configuration](#configuration)
+* [Project Architecture](#project-architecture)
+* [Contributing](#contributing)
+* [License](#license)
 
-**3. `config.py`:** Contains configuration settings, including the Google Gemini API key, model name, and LLM configuration.  It initializes the `ChatGoogleGenerativeAI` LLM from the Langchain Google GenAI library.  Error handling is included to check for missing API keys and LLM initialization failures.  Example:
 
-```python
-genai_api_key = os.getenv('GEMINI_API_KEY')
-os.environ['GOOGLE_API_KEY'] = os.getenv('GEMINI_API_KEY')
-if genai_api_key is None:
-    raise ValueError("Missing GEMINI_API_KEY environment variable")
+## Prerequisites
 
-def configure_llm():
-    try:
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7, top_p=0.85)
-        if llm is None:
-            raise ValueError("LLM component is None")
-        return llm
-    except Exception as e:
-        print(f"Failed to configure LLM: {e}")
-        return None
+* A GitHub repository.
+* A [Google Generative AI](https://generativeai.google/) API key (stored as the `GEMINI_API_KEY` environment variable).  This is crucial for the Langchain components to function.
+* Python 3.9 or higher.  The project's dependencies are listed in `requirements.txt`.
+
+
+## Installation
+
+1.  **Install the GitHub Action:** Add the following workflow to your `.github/workflows` directory (e.g., `.github/workflows/readme.yml`):
+
+```yaml
+name: Generate README
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: harshkasat/ReadmePRAutomate@main
+        with:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # Replace with your secret
 ```
 
-**4. & 5. `file_processing.py`:** This file contains functions for:
+2.  **Add your API key as a GitHub Secret:**  Go to your repository's settings, navigate to "Secrets and variables" -> "Actions", and add a secret named `GEMINI_API_KEY` with your Google Generative AI API key.
 
-* **`clone_github_repo(github_url, local_path)`:** Clones a GitHub repository using `subprocess.run`.  Handles potential errors during cloning.
-* **`load_and_index_files(repo_path)`:** Loads files of various extensions from a given path, splits them into chunks using `RecursiveCharacterTextSplitter`, and creates a BM25Okapi index for efficient searching.  It also calculates TF-IDF vectors.  The function returns the index, split documents, file type counts, and a list of file sources.
-* **`search_documents(query, index, documents, n_results=5)`:** Searches the indexed documents using both BM25 and TF-IDF cosine similarity, combines the scores, and returns the top `n_results` documents.
+3.  **Commit and Push:** Commit the changes to your repository. The action will automatically run on each push to the `main` branch.
 
 
-**Other Files:** The presence of `main.py`, `questions.py`, and `utils.py` suggests that these files contain the main logic for driving the application, defining the questions to ask about the repository, and utility functions respectively, but their content isn't provided.
+## Usage
 
-## Setup and Usage
+The action automatically generates a README.md file based on the files in your repository.  It uses Langchain to analyze the code and files, extracting information to populate the README's various sections.  The level of detail in the generated README depends on the content and structure of your project.
 
-1. **Install Dependencies:**  Install the packages listed in `requirements.txt` using `pip install -r requirements.txt`.
-2. **Set Environment Variables:** Set the `GEMINI_API_KEY` environment variable with your Google Gemini API key.
-3. **Run the Application:** Execute `python app.py`.  (The exact execution details depend on the contents of `main.py`, which is not provided).  The application will likely require a GitHub repository URL as input.
 
-**Note:**  The provided code snippets show only parts of the functionality.  The complete functionality relies on the interaction between all the files, especially the missing `main.py` which orchestrates the process.  The README generation aspect is implicit and would likely be implemented within `main.py` or a related file.
+## Configuration
+
+The main configuration is done through environment variables.  The most important is `GEMINI_API_KEY`, which is required for accessing the Google Generative AI API.  The `config.py` file contains settings for the LLM (currently using `gemini-1.5-flash`), temperature, and top_p parameters.  These can be adjusted to fine-tune the generated README.
+
+
+## Project Architecture
+
+The project consists of several Python files:
+
+*   **`main.py`:** The main entry point of the action.
+*   **`config.py`:** Contains configuration settings for the LLM and API key.
+*   **`file_processing.py`:** Handles file loading, indexing, and searching using BM25Okapi and TF-IDF.  This file uses Langchain's `DirectoryLoader` and `NotebookLoader` to handle various file types.  It also employs `RecursiveCharacterTextSplitter` for text chunking.  Functions like `clone_github_repo`, `load_and_index_files`, and `search_documents` are defined here.
+*   **`utils.py`:** (Not shown in provided code, but likely contains utility functions for text processing).
+
+
+The action uses Langchain for LLM interaction, document loading, and text splitting.  It leverages BM25Okapi and TF-IDF for efficient document search and retrieval.
+
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+**Note:**  The provided code snippets only show a portion of the project. The full functionality is more extensive, including functions for cleaning and tokenizing text (`clean_and_tokenize` in `file_processing.py`), which are essential for the search and indexing processes.  The `questions.py` file (not shown) likely contains prompts or questions used to guide the README generation process.  The actual README generation logic is not explicitly shown in the provided code.
