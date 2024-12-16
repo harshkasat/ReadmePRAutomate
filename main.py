@@ -1,5 +1,6 @@
 import tempfile
 from dotenv import load_dotenv
+from config import USERNAME
 from llm_readme_response import create_readme_file
 from pr_bot import clone_github_repo, chekout_github_repo, create_update_readme_file, \
     commit_github_repo, push_github_repo, create_pull_request, fork_repo, delete_forked_repo
@@ -30,11 +31,14 @@ def readme_automate(github_url):
                 create_update_readme_file(local_path, readme_markdown)
                 commit_github_repo(local_path)
                 push_github_repo(local_path)
-                create_pull_request(owner=owner, repo=repo_name)
+                response = create_pull_request(owner=owner, repo=repo_name)
+                return 'success' if response is not None else 'failed'
             else:
-                print("Failed to clone the repository.")
+                return 'failed'
     except Exception as e:
         print(f"An error occurred: {e}")
+        return 'failed'
     finally:
-        if forked_url:
-            delete_forked_repo(repo_name=repo_name)
+        if forked_url and owner != USERNAME:
+            # delete_forked_repo(repo_name=repo_name)
+            pass

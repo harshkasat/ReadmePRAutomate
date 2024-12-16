@@ -142,13 +142,4 @@ def delete_forked_repo(repo_name: str) -> None:
         print(f"Failed to delete repository: {response.status_code}")
         print(response.json())
 
-
-if __name__ == "__main__":
-#     # Call the function
-    repo_url = "https://github.com/abhishekdumaniya/quiz-application"  # Replace with the repository you want to fork
-#     # Extract the owner and repository name from the URL
-    parts = repo_url.rstrip("/").split("/")
-#     owner = parts[-2]
-    repo_name = parts[-1]
-#     # forked_repo = fork_repo(owner=owner, repo_name=repo_name)
-    delete_forked_repo(repo_name=repo_name)
+# TODO: Create a Pull Request
