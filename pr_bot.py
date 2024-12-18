@@ -43,9 +43,9 @@ def create_update_readme_file(local_path, readme_markdown):
         print(f"Failed to create/update README.md file: {e}")
         return None
 
-def push_github_repo(local_path):
+def push_github_repo(local_path, repo):
     try:
-        subprocess.run(['git', 'push', 'origin', BRANCH_NAME], cwd=local_path, check=True)
+        subprocess.run(['git', 'push', f'https://{USERNAME}:{GITHUB_TOKEN}@github.com/{USERNAME}/{repo}.git'], cwd=local_path, check=True)
         print('Push the github repo')
         return True
     except subprocess.CalledProcessError as e:
@@ -111,35 +111,3 @@ def fork_repo(owner: str, repo_name: str) -> str:
         print(f"Failed to fork repository: {response.status_code}")
         print(response.json())
         return None
-
-
-def delete_forked_repo(repo_name: str) -> None:
-    """
-    This function deletes a forked repository on GitHub.
-
-    Parameters:
-    repo_name (str): The name of the forked repository to be deleted.
-
-    Returns:
-    None: This function does not return any value. It only prints a message indicating whether the deletion was successful or not.
-
-    The function sends a DELETE request to the GitHub API endpoint for deleting a repository. If the request is successful (status code 204), it prints a message indicating that the repository was deleted successfully. If the request fails, it prints an error message containing the status code and the JSON response from the API.
-    """
-
-    # GitHub API endpoint for deleting a repository
-    api_url = f"https://api.github.com/repos/{USERNAME}/{repo_name}"
-    headers = {
-        "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-
-    # Send the DELETE request to delete the repository
-    response = requests.delete(api_url, headers=headers)
-
-    if response.status_code == 204:
-        print(f"Repository '{repo_name}' deleted successfully!")
-    else:
-        print(f"Failed to delete repository: {response.status_code}")
-        print(response.json())
-
-# TODO: Create a Pull Request

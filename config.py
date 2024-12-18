@@ -4,9 +4,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-WHITE = "\033[37m"
-GREEN = "\033[32m"
-RESET_COLOR = "\033[0m"
 BRANCH_NAME = 'readme-file'
 COMMIT_MESSAGE = 'Update README.md: Add installation instructions'
 PR_TITLE = 'Update README.md: Add installation instructions'
