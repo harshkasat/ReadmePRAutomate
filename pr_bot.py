@@ -24,6 +24,17 @@ def chekout_github_repo(local_path):
 
 def commit_github_repo(local_path):
     try:
+        # Set a default anonymous author configuration
+        subprocess.run(
+            ['git', 'config', 'user.email', 'noreply@example.com'],
+            cwd=local_path,
+            check=True
+        )
+        subprocess.run(
+            ['git', 'config', 'user.name', 'Anonymous'],
+            cwd=local_path,
+            check=True
+        )
         subprocess.run(['git', 'add', '.'], cwd=local_path, check=True)
         subprocess.run(['git', 'commit', '-m', COMMIT_MESSAGE], cwd=local_path, check=True)
         print('Committing github repo')

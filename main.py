@@ -1,4 +1,5 @@
 import tempfile
+import time
 from dotenv import load_dotenv
 from llm_readme_response import create_readme_file
 from pr_bot import clone_github_repo, chekout_github_repo, create_update_readme_file, \
@@ -20,6 +21,7 @@ def readme_automate(github_url):
                 return
             try:
                 forked_url = fork_repo(owner=owner, repo_name=repo_name)
+                time.sleep(0.7)
             except Exception as e:
                 print(f"Failed to fork repository: {e}")
                 return
