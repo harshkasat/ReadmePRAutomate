@@ -9,7 +9,7 @@ COMMIT_MESSAGE = 'Update README.md: Add installation instructions'
 PR_TITLE = 'Update README.md: Add installation instructions'
 PR_BODY = 'This PR updates the README.md file by adding a section with detailed installation instructions for different operating systems.'
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-USERNAME = os.getenv("USERNAME")
+GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 
 genai_api_key = os.getenv('GEMINI_API_KEY')
 os.environ['GOOGLE_API_KEY'] = os.getenv('GEMINI_API_KEY')

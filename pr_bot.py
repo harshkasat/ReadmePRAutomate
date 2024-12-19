@@ -1,7 +1,7 @@
 import os
 import requests
 import subprocess
-from config import BRANCH_NAME, COMMIT_MESSAGE, PR_TITLE, PR_BODY, GITHUB_TOKEN, USERNAME
+from config import BRANCH_NAME, COMMIT_MESSAGE, PR_TITLE, PR_BODY, GITHUB_TOKEN, GITHUB_USERNAME
 
 
 def clone_github_repo(github_url, local_path):
@@ -45,7 +45,7 @@ def create_update_readme_file(local_path, readme_markdown):
 
 def push_github_repo(local_path, repo):
     try:
-        subprocess.run(['git', 'push', f'https://{USERNAME}:{GITHUB_TOKEN}@github.com/{USERNAME}/{repo}.git'], cwd=local_path, check=True)
+        subprocess.run(['git', 'push', f'https://{GITHUB_USERNAME}:{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{repo}.git'], cwd=local_path, check=True)
         print('Push the github repo')
         return True
     except subprocess.CalledProcessError as e:
@@ -61,7 +61,7 @@ def create_pull_request(owner, repo):
         }
         payload = {
             "title": PR_TITLE,
-            "head": f'{USERNAME}:{BRANCH_NAME}',
+            "head": f'{GITHUB_USERNAME}:{BRANCH_NAME}',
             "base": 'main',
             "body": PR_BODY
         }
@@ -104,7 +104,7 @@ def fork_repo(owner: str, repo_name: str) -> str:
     response = requests.post(api_url, headers=headers)
 
     if response.status_code == 202:
-        forked_url = f"https://github.com/{USERNAME}/{repo_name}"
+        forked_url = f"https://github.com/{GITHUB_USERNAME}/{repo_name}"
         print(f"Repository forked successfully! Forked repo: {forked_url}")
         return forked_url
     else:
