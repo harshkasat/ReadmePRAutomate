@@ -41,6 +41,9 @@ async def automate_github_readme(request: RepositoryRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get('/health')
+async def health_check():
+    return {'message': 'Healthy'}
 
 if __name__ == '__main__':
     import uvicorn
